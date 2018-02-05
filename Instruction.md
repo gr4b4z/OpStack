@@ -126,7 +126,7 @@ systemctl restart rbdmap
 *  **keystone-server** to the cluster   
 4.  Click **Apply** to start applying the Keystone barclamp  
  
-#4.12 Install Glance 
+## 4.12 Install Glance 
 
 1. Open SUSE OpenStack Cloud admin web portal <http://ADMIN_NODE_IP_ON_ADMIN_NETWORK> and go to Barclamps à OpenStack  
 2. Go to **Create** for Glance barclamp  
