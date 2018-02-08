@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import csv
 import os
 import subprocess
@@ -62,12 +63,12 @@ class Instance:
 
 def processInstance( inst ):
     if inst.new_instance_id==None:
-        inst.new_instance_id = subprocess.check_output(['bash','-c', "./create_instance.sh {} {} {}".format(inst.flavor_id,inst.volumes[0].new_volume_id,inst.host_name)]).rstrip()
+       # inst.new_instance_id = subprocess.check_output(['bash','-c', "./create_instance.sh {} {} {}".format(inst.flavor_id,inst.volumes[0].new_volume_id,inst.host_name)]).rstrip()
         
-        # instId=subprocess.check_output(['bash','-c', "openstack server create --flavor {} --volume {} --security-group test --key-name cloud --nic net-id=a8b93582-2589-4a52-a2a5-862241eb3c8a {} -f value -c id".format(inst.flavor_id,vol.new_volume_id,inst.host_name)])
-        # subprocess.call(['sleep','5'])
-        # floatIP=subprocess.check_output(['bash','-c', "openstack floating ip list -f value | grep None | awk 'NR==1 {print {}}".format(inst.volumes[0].new_volume_id)])
-        # subprocess.call(['bash','-c', "openstack server add floating ip {} {}".format(instId,floatIP )])
+        inst.new_instance_id=subprocess.check_output(['bash','-c', "openstack server create --flavor {} --volume {} --security-group test --key-name cloud --nic net-id=a8b93582-2589-4a52-a2a5-862241eb3c8a {} -f value -c id".format(inst.flavor_id,vol.new_volume_id,inst.host_name)])
+        subprocess.call(['sleep','5'])
+        floatIP=subprocess.check_output(['bash','-c', "openstack floating ip list -f value | grep None | awk 'NR==1 {print {}}".format(inst.volumes[0].new_volume_id)])
+        subprocess.call(['bash','-c', "openstack server add floating ip {} {}".format(instId,floatIP )])
 
         for vol in inst.volumes[1:]:
             print('Attaching volume {}'.format(vol.mount_point))
@@ -82,7 +83,7 @@ def processVolume(vol):
             subprocess.call(["sleep", "5"])
             subprocess.call(["rbd","rm","volumes/volume-{}".format(vol.new_volume_id)])
             subprocess.call(["qemu-img","convert","-p","-f","vmdk","-O","raw","./volumes/volume-{}.vmdk".format(vol.old_volume_id),"./volumes/volume-{}.raw".format(vol.old_volume_id)])
-	        subprocess.call(["rbd","import","--image-format","2","./volumes/volume-{}.raw".format(vol.old_volume_id),"volumes/volume-{}".format(vol.new_volume_id)])
+            subprocess.call(["rbd","import","--image-format","2","./volumes/volume-{}.raw".format(vol.old_volume_id),"volumes/volume-{}".format(vol.new_volume_id)])
             subprocess.call(["rm", "./volumes/volume-{}.raw".format(vol.old_volume_id)])
 
             if vol.is_bootable:
