@@ -1,3 +1,6 @@
+**OpStack Doc**
+-----------
+
 ## 4.6 Install Ceph cluster
 1. Open SUSE OpenStack Cloud admin web portal <http://ADMIN_NODE_IP_ON_ADMIN_NETWORK> and go to Barclamps -> OpenStack
 2. Go to **Create** for Ceph barclamp
