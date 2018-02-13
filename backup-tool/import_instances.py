@@ -3,6 +3,7 @@ import csv
 import os
 import subprocess
 import sys
+import logging
 from model import Flavor,Volume,Instance
 class Instance_importer:
 
@@ -38,14 +39,14 @@ class Instance_importer:
             subprocess.call(['bash','-c', "openstack server add floating ip {} {}".format(instId,floatIP )])
 
             for vol in inst.volumes[1:]:
-                print('Attaching volume {}'.format(vol.mount_point))
+                logging.info('Attaching volume {}'.format(vol.mount_point))
                 subprocess.check_output(['bash','-c', "openstack server add volume {} {}".format(inst.new_instance_id,vol.new_volume_id)])
         return inst
 
     def processVolume(self,vol):
         if vol.new_volume_id==None:
             if os.path.isfile('volumes/volume-{}.vmdk'.format(vol.old_volume_id)):
-                print("Creating Volume")
+                logging.info("Creating Volume")
                 vol.new_volume_id = subprocess.check_output(['bash','-c', "openstack volume create --size {} {} -c id -f value".format(vol.size,vol.display_name)]).rstrip()
                 subprocess.call(["sleep", "5"])
                 subprocess.call(["rbd","rm","volumes/volume-{}".format(vol.new_volume_id)])
@@ -54,24 +55,24 @@ class Instance_importer:
                 subprocess.call(["rm", "./volumes/volume-{}.raw".format(vol.old_volume_id)])
 
                 if vol.is_bootable:
-                    print('Setting {} as bootable'.format(vol.new_volume_id))
+                    logging.info('Setting {} as bootable'.format(vol.new_volume_id))
                     subprocess.check_output(['bash','-c', "cinder set-bootable {} True".format(vol.new_volume_id)])
             else:
-                print("ignoring volume, it doesn't exists on disk")
+                logging.info("ignoring volume, it doesn't exists on disk")
         return vol
 
     def create_instances(self):
         total=len(self.instances_to_import)
         i=0
         if total == 0:
-            print('# Nothing to import')
+            logging.info('# Nothing to import')
 
         for instance in self.instances_to_import:
             i=i+1
-            print('# Analyzing {}/{}'.format(i,total))
-            print(instance)
+            logging.info('# Analyzing {}/{}'.format(i,total))
+            logging.info(instance)
             for volume in instance.volumes:
-                print("   {}".format(volume))
+                logging.info("   {}".format(volume))
                # self.processVolume(volume)
             #self.processInstance(instance)
 
@@ -95,21 +96,21 @@ class Instance_importer:
                     missing_volumes.append(volume.mount_point)
                     exists=exists & False
             if exists:
-                print('Complete VM {}'.format(instance.host_name))
+                logging.info('Complete VM {}'.format(instance.host_name))
                 goodInstances.append(instance)
             elif has_root_volume:
-                print('Not Complete VM {}- Root volume exists'.format(instance.host_name))
-                for p in missing_volumes: print('   Missing volume {}'.format(p)) 
+                logging.info('Not Complete VM {}- Root volume exists'.format(instance.host_name))
+                for p in missing_volumes: logging.info('   Missing volume {}'.format(p)) 
                 instance.addVolumes(existing_volumes)
                 instancesWithMissingDisc.append(instance)
             else:
-                print('Wrong VM {} - No volume'.format(instance.host_name))
-                for p in missing_volumes: print('   Missing volume {}'.format(p))
+                logging.info('Wrong VM {} - No volume'.format(instance.host_name))
+                for p in missing_volumes: logging.info('   Missing volume {}'.format(p))
                 wrongRootVolume.append(instance.host_name)
                 
         self.instances_to_import=goodInstances + instancesWithMissingDisc	
-        print('-------------------------------')	
-        print('Good Instances              :{}'.format(len(goodInstances)))
-        print('Instances with missing disk :{}'.format(len(instancesWithMissingDisc)))
-        print('Instances with missing root :{}'.format(len(wrongRootVolume)))  
+        logging.info('-------------------------------')	
+        logging.info('Good Instances              :{}'.format(len(goodInstances)))
+        logging.info('Instances with missing disk :{}'.format(len(instancesWithMissingDisc)))
+        logging.info('Instances with missing root :{}'.format(len(wrongRootVolume)))  
         

@@ -1,4 +1,4 @@
-
+#!/usr/bin/python
 
 import argparse
 
@@ -24,9 +24,14 @@ from export_instance import export_metadata
 from import_instances import Instance_importer
 from model_manager import Model_manager
 from progress_manager import Progress_manager
+from volume_move import copy_volumes
 import subprocess
 import sys
 import os
+import logging
+#logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO,format='%(asctime)s %(message)s')
+
 
 
 
@@ -40,10 +45,10 @@ elif args.config!=None or os.path.isfile('config.json'):
     import json
     with open(args.config if args.config != None else 'config.json', 'r') as f:
         cfg = json.load(f)
-        args.username=cfg.username
-        args.pwd=cfg.password
-        args.url=cfg.url
-        args.project=cfg.project
+        args.username=cfg['username']
+        args.pwd=cfg['password']
+        args.url=cfg['url']
+        args.project=cfg['project']
 elif 'USERNAME' in os.environ:
     args.username=os.environ["USERNAME"]
     args.pwd=os.environ["PASSWORD"]
@@ -63,19 +68,20 @@ if command == 'import':
     
     instances_to_process=progress.filter_by_progress(instances_kv)
     try:
-        importer = Instance_importer(args.username, args.passwd,args.project,args.url)
+        importer = Instance_importer(args.username, args.pwd,args.project,args.url)
         importer.prepare_instances(instances_to_process)
         if args.check == False:
             #importer.create_flavor(flavor_kv.values())
             importer.create_instances()
-    except Exception as e: print(e)
+    except Exception as e: logging.exception(e)
     finally:
             progress.save_progress(instances_to_process)
 elif command == 'export':
-    print("Exporting instance metadata")
+    logging.info("Exporting instance metadata")
     model=Model_manager(INSTANCE_FILE)
-    (instances,flavors)=export_metadata(args.username, args.passwd,args.project,args.url,args.instance)
-    
-    only_volumes=reduce((lambda prev, x: x.volumes+prev), instances.values(),[])
-    only_volumes = Progress_manager().filter_by_exported(only_volumes)
+    (instances,flavors)=export_metadata(args.username, args.pwd,args.project,args.url,args.instance)
+    #instances_to_export = Progress_manager().filter_by_exported(instances)
+    instances_to_export=instances
+    if args.check == False:
+        copy_volumes(instances_to_export,args.username, args.pwd,args.project,args.url)
     model.save_model(instances)   

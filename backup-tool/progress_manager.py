@@ -51,10 +51,14 @@ class Progress_manager:
                 inst.new_instance_id = inst_status[inst.old_instance_id]
         return all_instances
 
-    def filter_by_exported(self,all_volumes):
+    def filter_by_exported(self,instances_kv):
         import os
-        volumes_to_export=[]
-        for vol in all_volumes:
-            if os.path.isfile('volumes/volume-{}.vmdk'.format(vol.old_volume_id)):
-                volumes_to_export.append(vol)
-        return volumes_to_export
+        instances_to_export={}
+        for inst in instances_kv.values():
+            volumes_not_ready = len(inst.volumes)
+            for vol in inst.volumes:
+                if os.path.isfile('volumes/volume-{}.vmdk'.format(vol.old_volume_id)):
+                    volumes_not_ready-=1
+            if volumes_not_ready!=0:
+                instances_to_export[inst.old_instance_id]=inst
+        return instances_to_export

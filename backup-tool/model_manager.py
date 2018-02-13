@@ -1,19 +1,21 @@
 from model import Flavor,Volume,Instance
+import logging
+
 class Model_manager:
     def __init__(self,instance_file='instances.csv'):
         self.INSTANCE_FILE=instance_file
 
     def save_model(self,instances_kv):
-        print('====================== Instances =====================')	
+        logging.info('====================== Instances =====================')	
         instanceFile = open(self.INSTANCE_FILE,'w')
         for instance in instances_kv.values():
             for volume in instance.volumes:
                     fla = instance.flavor
                     row=('{},{},{},{},{},{},{},{},{},{}'.format(instance.host_name, instance.old_instance_id,fla.name,fla.cpu,fla.ram, volume.display_name, volume.mount_point, volume.is_bootable, volume.size,volume.old_volume_id)) 
                     instanceFile.write("{}\n".format(row))
-                    print(row)
+                    logging.info(row)
         instanceFile.close()
-        print('Instances file : {0} '.format(self.INSTANCE_FILE))
+        logging.info('Instances file : {0} '.format(self.INSTANCE_FILE))
         
 
     def read_model(self):

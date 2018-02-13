@@ -32,28 +32,3 @@ def export_metadata(user,passwd,project,url,instances = None):
 
 	# if generate_output == False:
 	return  (instance_list,flavor_list)	
-
-
-
-	# print('====================== Instances =====================')	
-
-	# instanceFile = open('backup_output.csv','w')
-	# for instance in instance_list.values():
-	# 	for volume in instance.volumes:
-	            
-	#             row=('{},{},{},{},{},{},{},{}'.format(instance.host_name, instance.old_instance_id, instance.flavor_id, volume.display_name, volume.mount_point, volume.is_bootable, volume.size,volume.old_volume_id)) 
-	# 	    instanceFile.write("{}\n".format(row))
-	# 	    print(row)
-	# instanceFile.close()
-	
-	# print('====================== Flavors =======================')
-				
-	# instanceFile = open('flavor_output.csv','w')
-	# for fla in flavor_list.values():
-	#          row2 = ('{},{},{}\n'.format(fla.name,fla.cpu,fla.ram)) 
-	#          instanceFile.write(row2)
-	# 	 print(row2)
-	# instanceFile.close()
-	
-	# return 	(instance_list,flavor_list)	
-
