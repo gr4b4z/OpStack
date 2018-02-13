@@ -35,7 +35,7 @@ def copy_volumes(instances,user,passwd,project,url):
             logging.info(nova.servers.get(inst.old_instance_id).status)
             for vol in inst.volumes:
                 j+=1
-                logging.info("Processing volume {}/{}... " .format(j,len(inst.volumes)),end='') 
+                logging.info("Processing volume {}/{}... " .format(j,len(inst.volumes))) 
                 if os.path.isfile('volumes/volume-{}.vmdk'.format(vol.old_volume_id)):
                     logging.info("already exists.") 
                     continue

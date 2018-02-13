@@ -11,11 +11,11 @@ parser.add_argument('--instance','-i', nargs='*', help='Specify instances that y
 parser.add_argument('--pipe', action='store_true', help='Use this switch if you want to use pipe ex. echo "ext" | backup-tool.py ')
 parser.add_argument('--check', action='store_true', help='Check ')
 
-parser.add_argument('--username', nargs='*')
-parser.add_argument('--pwd', nargs='*')
-parser.add_argument('--project', nargs='*')
-parser.add_argument('--url', nargs='*')
-parser.add_argument('--config', nargs='*')
+parser.add_argument('--username', nargs='?')
+parser.add_argument('--pwd', nargs='?')
+parser.add_argument('--project', nargs='?')
+parser.add_argument('--url', nargs='?')
+parser.add_argument('--config', nargs='?', help='Specify config file name. Default config.json. If needs to use ENV specify --config=ENV')
 
 args = parser.parse_args()
 
@@ -41,7 +41,7 @@ command = args.action
 
 if args.username != None:
     pass
-elif args.config!=None or os.path.isfile('config.json'):
+elif args.config!=None and args.config!="ENV" or os.path.isfile('config.json'):
     import json
     with open(args.config if args.config != None else 'config.json', 'r') as f:
         cfg = json.load(f)
@@ -49,12 +49,25 @@ elif args.config!=None or os.path.isfile('config.json'):
         args.pwd=cfg['password']
         args.url=cfg['url']
         args.project=cfg['project']
-elif 'USERNAME' in os.environ:
-    args.username=os.environ["USERNAME"]
-    args.pwd=os.environ["PASSWORD"]
-    args.url=os.environ["URL"]
-    args.project=os.environ["PROJECT"]
+elif 'OS_USERNAME' in os.environ:
+    args.username=os.environ["OS_USERNAME"]
+    args.pwd=os.environ["OS_PASSWORD"]
+    args.url=os.environ["OS_AUTH_URL"]
+    args.project=os.environ["OS_PROJECT_NAME"]
     
+if args.username == None:
+    args.username = raw_input("Please enter username: ")
+if args.pwd == None:
+    args.pwd = raw_input("Please enter password: ")
+if args.project == None:
+    args.project = raw_input("Please enter project name: ")
+if args.url == None:
+    args.url = raw_input("Please enter url: ")
+
+print args.username
+# print args.pwd
+print args.url
+print args.project
 
 if args.pipe:
     args.instance = sys.stdin.readlines()
